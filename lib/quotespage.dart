@@ -3,6 +3,7 @@ import 'package:quote_app/utils.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
+import 'package:auto_size_text/auto_size_text.dart';
 
 class QuotesPage extends StatefulWidget {
   final String categoryname;
@@ -15,8 +16,32 @@ class QuotesPage extends StatefulWidget {
 class _QuotesPageState extends State<QuotesPage> {
   List quotes = [];
   List authors = [];
-
   bool isDataThere = false;
+  int currentPageIndex = 0;
+
+  final List<Color> backgroundColors = [
+    Colors.blueAccent.shade100,
+    Colors.pinkAccent.shade100,
+    Colors.greenAccent.shade100,
+    Colors.orangeAccent.shade100,
+    Colors.purpleAccent.shade100,
+    Colors.tealAccent.shade100,
+    Colors.redAccent.shade100,
+    Colors.amberAccent.shade100,
+    Colors.lightBlueAccent.shade100,
+    Colors.lightGreenAccent.shade100,
+    Colors.yellowAccent.shade100,
+    Colors.cyanAccent.shade100,
+    Colors.indigoAccent.shade100,
+    Colors.deepPurpleAccent.shade100,
+    Colors.deepOrangeAccent.shade100,
+    Colors.limeAccent.shade100,
+    Colors.brown.shade100,
+    Colors.blueGrey.shade100,
+    Colors.grey.shade200,
+    Colors.cyan.shade200,
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -33,71 +58,72 @@ class _QuotesPageState extends State<QuotesPage> {
     quotes = quotesclass
         .map((element) => element.getElementsByClassName('text')[0].innerHtml)
         .toList();
-    print(quotes);
 
     authors = quotesclass
         .map((element) => element.getElementsByClassName('author')[0].innerHtml)
         .toList();
-    print(authors);
 
     setState(() {
       isDataThere = true;
     });
   }
 
+  Color getTextColor(Color backgroundColor) {
+    return backgroundColor.computeLuminance() > 0.5
+        ? Colors.black
+        : Colors.white;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.grey[200],
-        body: isDataThere == false
-            ? Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                physics: ScrollPhysics(),
-                child: Column(
-                  children: [
-                    Container(
-                      alignment: Alignment.center,
-                      margin: const EdgeInsets.only(top: 50),
-                      child: Text(
-                        "${widget.categoryname} quotes".toUpperCase(),
-                        style: textStyle(25, Colors.black, FontWeight.w700),
+      body: isDataThere == false
+          ? Center(child: CircularProgressIndicator())
+          : PageView.builder(
+              itemCount: quotes.length,
+              onPageChanged: (index) {
+                setState(() {
+                  currentPageIndex = index % backgroundColors.length;
+                });
+              },
+              itemBuilder: (context, index) {
+                Color bgColor = backgroundColors[currentPageIndex];
+                Color textColor = getTextColor(bgColor);
+
+                return Container(
+                  color: bgColor,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Card(
+                      color: bgColor,
+                      elevation: 10,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            AutoSizeText(
+                              quotes[index],
+                              style: textStyle(24, textColor, FontWeight.w700),
+                              textAlign: TextAlign.center,
+                              maxLines: 5, // Limits the number of lines
+                              minFontSize:
+                                  16, // Minimum font size to scale down to
+                            ),
+                            SizedBox(height: 20),
+                            Text(
+                              '- ${authors[index]}',
+                              style: textStyle(18, textColor.withOpacity(0.7),
+                                  FontWeight.w400),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: quotes.length,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          padding: EdgeInsets.all(10),
-                          child: Card(
-                            elevation: 10,
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 20, left: 20, bottom: 20),
-                                  child: Text(
-                                    quotes[index],
-                                    style: textStyle(
-                                        18, Colors.black, FontWeight.w700),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
-                                  child: Text(
-                                    authors[index],
-                                    style: textStyle(
-                                        15, Colors.black, FontWeight.w700),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    )
-                  ],
-                ),
-              ));
+                  ),
+                );
+              },
+            ),
+    );
   }
 }

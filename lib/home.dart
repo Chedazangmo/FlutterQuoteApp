@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:quote_app/quotespage.dart';
 import 'package:quote_app/utils.dart';
