@@ -51,7 +51,7 @@ void startQuoteNotification() {
   Workmanager().registerPeriodicTask(
     'quote_notification_task', // Task identifier
     'fetch_random_quote', // Task name
-    frequency: Duration(minutes: 2), // Frequency set to 2 minutes
+    frequency: const Duration(minutes: 15), // Frequency set to 2 minutes
   );
 }
 
@@ -59,7 +59,7 @@ Future<void> sendRandomQuoteNotification() async {
   String apiUrl = 'https://quotes.toscrape.com/';
   String quote = await fetchRandomQuote(apiUrl);
 
-  var androidDetails = AndroidNotificationDetails(
+  var androidDetails = const AndroidNotificationDetails(
     'quote_channel',
     'Quote Notifications',
     channelDescription: 'This channel sends random quotes every 2 minutes',

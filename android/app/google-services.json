@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "486476931206",
+    "project_id": "notification-17c62",
+    "storage_bucket": "notification-17c62.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:486476931206:android:846d14d1d554ea81f27107",
+        "android_client_info": {
+          "package_name": "com.example.quote_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA42UI4AlahSoWOM_mdnJaTsI4MAl90yCc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

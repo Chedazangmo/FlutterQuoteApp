@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/services.dart'; // For Clipboard
+import 'package:share_plus/share_plus.dart'; // For Sharing
 
 class QuotesPage extends StatefulWidget {
   final String categoryname;
@@ -19,7 +21,13 @@ class _QuotesPageState extends State<QuotesPage> {
   bool isDataThere = false;
   int currentPageIndex = 0;
 
+  bool isBackgroundColor = true;
+  bool isBackgroundChanging = true;
+
   final List<Color> backgroundColors = [
+    const Color.fromARGB(255, 227, 229, 231),
+    const Color.fromARGB(255, 10, 147, 221),
+    const Color.fromARGB(255, 12, 199, 37),
     Colors.blueAccent.shade100,
     Colors.pinkAccent.shade100,
     Colors.greenAccent.shade100,
@@ -40,6 +48,19 @@ class _QuotesPageState extends State<QuotesPage> {
     Colors.blueGrey.shade100,
     Colors.grey.shade200,
     Colors.cyan.shade200,
+  ];
+
+  final List<String> imageBackgrounds = [
+    'assets/images/bg1.jpg',
+    'assets/images/bg2.jpg',
+    'assets/images/bg3.jpg',
+    'assets/images/bg4.jpg',
+    'assets/images/ng6.jpg',
+    'assets/images/bg9.jpg',
+    'assets/images/bg10.jpg',
+    'assets/images/bg12.jpg',
+    'assets/images/bg13.jpg',
+    'assets/images/download.jpg',
   ];
 
   @override
@@ -77,50 +98,133 @@ class _QuotesPageState extends State<QuotesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Quotes - ${widget.categoryname}'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Switch(
+              value: isBackgroundChanging,
+              onChanged: (value) {
+                setState(() {
+                  isBackgroundChanging = value;
+                });
+              },
+              activeColor: const Color.fromARGB(255, 17, 171, 89),
+              inactiveThumbColor: const Color.fromARGB(255, 180, 19, 19),
+              inactiveTrackColor: const Color.fromARGB(255, 49, 115, 148),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Switch(
+              value: isBackgroundColor,
+              onChanged: (value) {
+                setState(() {
+                  isBackgroundColor = value;
+                });
+              },
+              activeColor: const Color.fromARGB(255, 17, 171, 89),
+              inactiveThumbColor: const Color.fromARGB(255, 180, 19, 19),
+              inactiveTrackColor: const Color.fromARGB(255, 49, 115, 148),
+            ),
+          ),
+        ],
+      ),
       body: isDataThere == false
           ? Center(child: CircularProgressIndicator())
           : PageView.builder(
               itemCount: quotes.length,
               onPageChanged: (index) {
-                setState(() {
-                  currentPageIndex = index % backgroundColors.length;
-                });
+                if (isBackgroundChanging) {
+                  setState(() {
+                    currentPageIndex = index % backgroundColors.length;
+                  });
+                }
               },
               itemBuilder: (context, index) {
-                Color bgColor = backgroundColors[currentPageIndex];
-                Color textColor = getTextColor(bgColor);
+                Widget backgroundWidget;
 
-                return Container(
-                  color: bgColor,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Card(
-                      color: bgColor,
-                      elevation: 10,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            AutoSizeText(
-                              quotes[index],
-                              style: textStyle(24, textColor, FontWeight.w700),
-                              textAlign: TextAlign.center,
-                              maxLines: 5, // Limits the number of lines
-                              minFontSize:
-                                  16, // Minimum font size to scale down to
-                            ),
-                            SizedBox(height: 20),
-                            Text(
-                              '- ${authors[index]}',
-                              style: textStyle(18, textColor.withOpacity(0.7),
-                                  FontWeight.w400),
-                            ),
-                          ],
+                if (isBackgroundColor) {
+                  Color bgColor = isBackgroundChanging
+                      ? backgroundColors[currentPageIndex]
+                      : backgroundColors[0];
+                  backgroundWidget = Container(
+                    color: bgColor,
+                  );
+                } else {
+                  String imageUrl =
+                      imageBackgrounds[index % imageBackgrounds.length];
+                  backgroundWidget = isBackgroundChanging
+                      ? Image.network(imageUrl, fit: BoxFit.cover)
+                      : Image.asset(imageUrl, fit: BoxFit.cover);
+                }
+
+                return Stack(
+                  children: [
+                    backgroundWidget,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Card(
+                        elevation: 10,
+                        color: Colors.transparent,
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              AutoSizeText(
+                                quotes[index],
+                                style: textStyle(
+                                    24, Colors.white, FontWeight.w700),
+                                textAlign: TextAlign.center,
+                                maxLines: 5,
+                                minFontSize: 16,
+                              ),
+                              SizedBox(height: 20),
+                              Text(
+                                '- ${authors[index]}',
+                                style: textStyle(
+                                    18,
+                                    Colors.white.withOpacity(0.7),
+                                    FontWeight.w400),
+                              ),
+                              SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.copy,
+                                        color: Colors.white.withOpacity(0.7)),
+                                    onPressed: () {
+                                      Clipboard.setData(ClipboardData(
+                                          text:
+                                              '${quotes[index]} - ${authors[index]}'));
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                              "Quote copied to clipboard!"),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.share,
+                                        color: Colors.white.withOpacity(0.7)),
+                                    onPressed: () {
+                                      Share.share(
+                                          '${quotes[index]} - ${authors[index]}');
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 );
               },
             ),
