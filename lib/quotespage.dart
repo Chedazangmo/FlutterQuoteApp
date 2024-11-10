@@ -9,7 +9,7 @@ import 'package:share_plus/share_plus.dart'; // For Sharing
 
 class QuotesPage extends StatefulWidget {
   final String categoryname;
-  QuotesPage(this.categoryname);
+  const QuotesPage(this.categoryname, {super.key});
 
   @override
   State<QuotesPage> createState() => _QuotesPageState();
@@ -21,7 +21,7 @@ class _QuotesPageState extends State<QuotesPage> {
   bool isDataThere = false;
   int currentPageIndex = 0;
 
-  bool isBackgroundColor = true;
+  bool isBackgroundColor = true; // Default background option is color
   bool isBackgroundChanging = true;
 
   final List<Color> backgroundColors = [
@@ -61,7 +61,11 @@ class _QuotesPageState extends State<QuotesPage> {
     'assets/images/bg12.jpg',
     'assets/images/bg13.jpg',
     'assets/images/download.jpg',
+    // Add more image paths as needed
   ];
+
+  // New variable to hold selected background option (color or image)
+  String selectedBackground = 'Color';
 
   @override
   void initState() {
@@ -89,12 +93,6 @@ class _QuotesPageState extends State<QuotesPage> {
     });
   }
 
-  Color getTextColor(Color backgroundColor) {
-    return backgroundColor.computeLuminance() > 0.5
-        ? Colors.black
-        : Colors.white;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,36 +101,39 @@ class _QuotesPageState extends State<QuotesPage> {
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Switch(
-              value: isBackgroundChanging,
-              onChanged: (value) {
-                setState(() {
-                  isBackgroundChanging = value;
-                });
-              },
-              activeColor: const Color.fromARGB(255, 17, 171, 89),
-              inactiveThumbColor: const Color.fromARGB(255, 180, 19, 19),
-              inactiveTrackColor: const Color.fromARGB(255, 49, 115, 148),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Switch(
-              value: isBackgroundColor,
-              onChanged: (value) {
-                setState(() {
-                  isBackgroundColor = value;
-                });
-              },
-              activeColor: const Color.fromARGB(255, 17, 171, 89),
-              inactiveThumbColor: const Color.fromARGB(255, 180, 19, 19),
-              inactiveTrackColor: const Color.fromARGB(255, 49, 115, 148),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black, // Make the button's background black
+                borderRadius:
+                    BorderRadius.circular(8), // Optional: rounded corners
+              ),
+              child: DropdownButton<String>(
+                dropdownColor:
+                    Colors.black, // Set the dropdown background to black
+                value: selectedBackground,
+                icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                style:
+                    const TextStyle(color: Colors.white), // Dropdown text color
+                underline: Container(), // Remove the default underline
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedBackground = newValue!;
+                  });
+                },
+                items: <String>['Color', 'Image', 'Default']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value, style: TextStyle(color: Colors.white)),
+                  );
+                }).toList(),
+              ),
             ),
           ),
         ],
       ),
       body: isDataThere == false
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : PageView.builder(
               itemCount: quotes.length,
               onPageChanged: (index) {
@@ -145,19 +146,37 @@ class _QuotesPageState extends State<QuotesPage> {
               itemBuilder: (context, index) {
                 Widget backgroundWidget;
 
-                if (isBackgroundColor) {
+                if (selectedBackground == 'Color') {
                   Color bgColor = isBackgroundChanging
                       ? backgroundColors[currentPageIndex]
                       : backgroundColors[0];
                   backgroundWidget = Container(
                     color: bgColor,
                   );
-                } else {
+                } else if (selectedBackground == 'Image') {
                   String imageUrl =
                       imageBackgrounds[index % imageBackgrounds.length];
                   backgroundWidget = isBackgroundChanging
-                      ? Image.network(imageUrl, fit: BoxFit.cover)
-                      : Image.asset(imageUrl, fit: BoxFit.cover);
+                      ? Image.asset(
+                          imageUrl,
+                          fit: BoxFit
+                              .cover, // Ensures the image covers the entire screen
+                          width: double.infinity,
+                          height: double.infinity,
+                          alignment: Alignment.center,
+                        )
+                      : Image.asset(
+                          imageUrl,
+                          fit: BoxFit
+                              .cover, // Ensures the image covers the entire screen
+                          width: double.infinity,
+                          height: double.infinity,
+                          alignment: Alignment.center,
+                        );
+                } else {
+                  backgroundWidget = Container(
+                    color: Colors.white,
+                  );
                 }
 
                 return Stack(
@@ -181,7 +200,7 @@ class _QuotesPageState extends State<QuotesPage> {
                                 maxLines: 5,
                                 minFontSize: 16,
                               ),
-                              SizedBox(height: 20),
+                              const SizedBox(height: 20),
                               Text(
                                 '- ${authors[index]}',
                                 style: textStyle(
@@ -189,7 +208,7 @@ class _QuotesPageState extends State<QuotesPage> {
                                     Colors.white.withOpacity(0.7),
                                     FontWeight.w400),
                               ),
-                              SizedBox(height: 20),
+                              const SizedBox(height: 20),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -202,7 +221,7 @@ class _QuotesPageState extends State<QuotesPage> {
                                               '${quotes[index]} - ${authors[index]}'));
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
-                                        SnackBar(
+                                        const SnackBar(
                                           content: Text(
                                               "Quote copied to clipboard!"),
                                         ),

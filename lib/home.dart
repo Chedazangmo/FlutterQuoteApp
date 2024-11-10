@@ -58,7 +58,7 @@ class _HomePageState extends State<HomePage> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    prefixIcon: Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search),
                   ),
                 ),
               ),
@@ -87,15 +87,24 @@ class _HomePageState extends State<HomePage> {
                           builder: (context) => QuotesPage(category),
                         ),
                       ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 110, 106, 106),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Center(
-                          child: Text(
-                            category.toUpperCase(),
-                            style: textStyle(20, Colors.black, FontWeight.bold),
+                      child: Material(
+                        elevation: 5, // Apply elevation to give shadow effect
+                        borderRadius:
+                            BorderRadius.circular(20), // Rounded corners
+                        color: const Color.fromARGB(255, 90, 89,
+                            89), // Set background color (light grey)
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.circular(20), // Rounded corners
+                            color: Colors.grey[200], // Light grey background
+                          ),
+                          child: Center(
+                            child: Text(
+                              category.toUpperCase(),
+                              style:
+                                  textStyle(20, Colors.black, FontWeight.bold),
+                            ),
                           ),
                         ),
                       ),
